@@ -11,18 +11,19 @@ const formfields = [
 export default function Form(props: {closeFormCB : () => void}){
     
     const [formState, setFormState] = useState(formfields); //the initial state is the formfields
-    const [fieldState, setFieldState] = useState("");
+    const [newFieldState, setNewField] = useState("");
 
     const addFormField = () => {
         setFormState([
             ...formState,
             {
                 id: Number(new Date()),
-                label: fieldState,
+                label: newFieldState,
                 type: "text"
 
             },
         ]);
+        setNewField("");
     };
 
     const removeFormField = (id: number) => {
@@ -53,8 +54,9 @@ export default function Form(props: {closeFormCB : () => void}){
                 <input
                 className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                 type="text"
+                value={newFieldState}
                 onChange={(e) => {
-                    setFieldState(e.target.value);
+                    setNewField(e.target.value);
                 }}
                 />
             </div>
