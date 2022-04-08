@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import AppContainer from './AppContainer';
 import Header from './Header';
-import Home from './components/home';
+import Home from './components/Home';
 import Form from './components/Form';
 
 function App() {
