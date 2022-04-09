@@ -3,17 +3,23 @@ import AppContainer from './AppContainer';
 import Header from './Header';
 import Home from './components/Home';
 import Form from './components/Form';
+import FormList from './components/FormList';
 
 function App() {
   
   const [state, setState] = useState<string>('HOME');
-
-  const openForm = () => {
+  const [currentForm, setCurrentForm] = useState<number>(-1);
+  const openList = () => {
     setState("FORM");
   }
 
-  const closeForm = () => {
+  const closeList = () => {
     setState("HOME");
+  }
+
+  const editForm = (id: number) => {
+    setState("EDIT_FORM");
+    setCurrentForm(id);
   }
 
   return (
@@ -23,9 +29,10 @@ function App() {
       title={"Welcome to Lesson 5 of $react-typescript with #tailwindcss"}
       />
       {state === 'HOME' ? (
-      <Home openFormCB={openForm}/>
+      <Home openFormCB={openList}/>
       ) : (
-        <Form closeFormCB = {closeForm}/>
+        state === 'FORM' ? (<FormList closeListCB={closeList} editFormCB={editForm}/>) : 
+        <Form id={currentForm} closeFormCB={openList}/>
       )}
     </div>
   </AppContainer>

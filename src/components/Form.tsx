@@ -8,33 +8,32 @@ interface formField {
 }
 
 interface formData {
+    id: number;
     title: string;
     formfields: formField[];
 }
 
-const initialformfields = [
-    {id: 1, label: "First Name", type: "text", value: ""},
-    {id: 2, label: "Last Name", type: "text", value: ""},
-    {id: 3, label: "Email", type: "email", value: ""},
-    {id: 4, label: "Date of Birth", type: "date", value: ""},
-    {id: 5, label: "Phone Number", type: "tel", value: ""},
-  ];
+export default function Form(props: {closeFormCB : () => void, id : number}){
 
-export default function Form(props: {closeFormCB : () => void}){
-
-    const initialState : () => formData = () => {
-        const formDataJSON = localStorage.getItem("formData");
-        const formDataString = formDataJSON ? 
-        JSON.parse(formDataJSON) :
-        {
-            title: "Untitled Form",
-            formfields: initialformfields
-        };
-
-        return formDataString;
+    const saveLocalForms : (localForms: formData[]) => void = (localForms) => {
+        localStorage.setItem("savedForms", JSON.stringify(localForms));
     }
 
-    const [formState, setFormState] = useState(initialState()); //the initial state is the formfields
+    const getLocalForms: () => formData[] = () => {
+        const savedFormsJSON = localStorage.getItem("savedForms");
+        const persistentFormData = savedFormsJSON ? 
+        JSON.parse(savedFormsJSON) : [];
+
+        return persistentFormData;
+    }
+
+    const getCurrentForm : () => formData = () => {
+        const localForms = getLocalForms()
+
+        return (localForms.filter((form) => form.id === props.id)[0])
+    }
+
+    const [formState, setFormState] = useState(() => getCurrentForm()); 
     const [newFieldState, setNewField] = useState("");
     const titleRef = useRef<HTMLInputElement>(null);
 
@@ -74,13 +73,21 @@ export default function Form(props: {closeFormCB : () => void}){
     }
     
     const saveFormData = (currentState: formData) => {
-        localStorage.setItem("formData", JSON.stringify(currentState));
+        const localForms = getLocalForms();
+        if(localForms.length === 0){
+            saveLocalForms([currentState]);
+            return;
+        }
+        const updatedLocalForms = localForms.map((form) => form.id === currentState.id ? 
+        currentState : form
+        );
+        saveLocalForms(updatedLocalForms);
     }
 
     useEffect(() => {
         titleRef.current?.focus();
         document.title = "Form Editor";
-        return () => {document.title = "React App";};
+        return () => {document.title = "Forms";};
     }, [])
 
     useEffect(() => {
@@ -88,7 +95,7 @@ export default function Form(props: {closeFormCB : () => void}){
         return () => {
             clearTimeout(timeout);
         }
-    }, [formState]);
+    });
 
     const clearFormData = () => {
         setFormState({
