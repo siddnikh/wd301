@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from '../logo.svg';
 
-export default function Home(props: {openFormCB : () => void}){
+export default function Home(){
     return(
         <>
         <div className='flex'>
@@ -10,10 +10,10 @@ export default function Home(props: {openFormCB : () => void}){
                 <p>Welcome to the Home Page of the react course.</p>
             </div>
         </div>
-        <button 
+        <a 
             className="bg-blue-500 hover:bg-blue-700 w-full text-white font-bold py-2 px-4 m-2 rounded" 
-            onClick={props.openFormCB}
-            >Open Form</button>
+            href="/forms"
+            >Open Forms</a>
         </>
         
     );

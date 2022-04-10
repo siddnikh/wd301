@@ -13,7 +13,7 @@ interface formData {
     formfields: formField[];
 }
 
-export default function Form(props: {closeFormCB : () => void, id : number}){
+export default function Form(props: {id : number}){
 
     const saveLocalForms : (localForms: formData[]) => void = (localForms) => {
         localStorage.setItem("savedForms", JSON.stringify(localForms));
@@ -162,10 +162,10 @@ export default function Form(props: {closeFormCB : () => void, id : number}){
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
           onClick={() => saveFormData(formState)}
           >Save</button>
-          <button 
+          <a 
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
-          onClick={props.closeFormCB}
-          >Close Form</button>
+          href="/forms"
+          >Close Form</a>
           <button 
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
           onClick={() => clearFormData()}

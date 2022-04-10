@@ -13,7 +13,7 @@ interface formData {
     formfields: formField[];
 }
 
-export default function FormList(props: {editFormCB: (id : number) => void, closeListCB : () => void}){
+export default function FormList(){
 
     const getLocalForms : () => formData[] = () => {
         const localForms = localStorage.getItem("savedForms");
@@ -62,18 +62,18 @@ export default function FormList(props: {editFormCB: (id : number) => void, clos
                     >Remove</button>
                 </div>
                 <div>
-                    <button 
+                    <a 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    onClick={(e) => props.editFormCB(field.id)}
-                    >Edit</button>
+                    href={`/form/${field.id}`}
+                    >Edit</a>
                 </div>
             </div>
           ))}
           <hr className='mt-5' />
-          <button 
+          <a 
           className="mt-9 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-          onClick={props.closeListCB}
-          >Home</button>
+          href="/"
+          >Home</a>
           <button 
           className="mt-9 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
           onClick={() => addNewForm()}
