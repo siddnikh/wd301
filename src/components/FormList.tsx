@@ -80,6 +80,12 @@ export default function FormList(){
                     className="p-2 m-2 w-full">{field.title}</p>
                 </div>
                 <div>
+                    <Link 
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
+                    href={`/preview/${field.id}`}
+                    >Preview</Link>
+                </div>
+                <div>
                     <button 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
                     onClick={() => removeLocalForm(field.id)}

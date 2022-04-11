@@ -36,6 +36,7 @@ export default function Form(props: {id : number}){
 
     const [formState, setFormState] = useState(() => getCurrentForm()); 
     const [newFieldState, setNewField] = useState("");
+    const [fieldType, setFieldType] = useState("text");
     const titleRef = useRef<HTMLInputElement>(null);
 
     const addFormField = () => {
@@ -46,7 +47,7 @@ export default function Form(props: {id : number}){
                 {
                     id: Number(new Date()),
                     label: newFieldState,
-                    type: "text",
+                    type: fieldType,
                     value: "",
                 },
             ]
@@ -54,12 +55,12 @@ export default function Form(props: {id : number}){
         setNewField("");
     };
 
-    const updateField = (value: string, id: number) => {
+    const updateField = (label: string, id: number) => {
         setFormState({
             ...formState,
             formfields: 
             formState.formfields.map((field) => {
-                if(field.id === id) return {...field, value: value};
+                if(field.id === id) return {...field, label: label};
                 return field;
             }),
         });
@@ -123,11 +124,10 @@ export default function Form(props: {id : number}){
         {formState.formfields.map((field) => (
             <div className="flex">
                 <div className="flex-1" key={field.id}>
-                    <label>{field.label}</label>
                     <input
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                     type={field.type}
-                    value={field.value}
+                    value={field.label}
                     onChange={(e) => {
                         updateField(e.target.value, field.id);
                     }}
@@ -135,7 +135,7 @@ export default function Form(props: {id : number}){
                 </div>
                 <div>
                     <button 
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 mt-9 rounded"
+                    className="bg-blue-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
                     onClick={() => removeFormField(field.id)}
                     >Remove</button>
                 </div>
@@ -151,6 +151,15 @@ export default function Form(props: {id : number}){
                     setNewField(e.target.value);
                 }}
                 />
+            </div>
+            <div>
+            <select 
+            onChange={(e) => setFieldType(e.target.value)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 mt-3 rounded">
+                <option value="text">Text</option>
+                <option value="tel">Phone Number</option>
+                <option value="email">Email</option>
+            </select>
             </div>
             <div>
                 <button 
