@@ -1,3 +1,4 @@
+import { Link } from 'raviger';
 import React, { useEffect, useState, useRef } from 'react';
 
 interface formField {
@@ -162,10 +163,10 @@ export default function Form(props: {id : number}){
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
           onClick={() => saveFormData(formState)}
           >Save</button>
-          <a 
+          <Link
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
           href="/forms"
-          >Close Form</a>
+          >Close Form</Link>
           <button 
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
           onClick={() => clearFormData()}
