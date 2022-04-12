@@ -1,19 +1,6 @@
 import { navigate } from 'raviger';
 import React, { useState } from 'react';
-
-interface formField {
-    id: number;
-    label: string;
-    type: string;
-    value: string;
-}
-
-interface formData {
-    id: number;
-    title: string;
-    formfields: formField[];
-}
-
+import { formData, TextField, DropDownField } from '../types/formTypes';
 
 export default function Preview(props: {id : number}) {
 
@@ -47,22 +34,31 @@ export default function Preview(props: {id : number}) {
         navigate('/');
     }
 
+    const renderFormField = () => {
+        let currentFormField = formState.formfields[inputNumber]
+        if(currentFormField.kind === 'text' || currentFormField.kind === 'textarea'){
+            return(<div>
+                <label>{formState.formfields[inputNumber].label}</label>
+                <input
+                    className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
+                    type={currentFormField.fieldType}
+                    value={currentFormField.value}
+                    onChange={(e) => {
+                        updateField(e.target.value, currentFormField.id);
+                    }}
+                    />
+                 </div>);
+        }
+        return ( //radio or multi-select or dropdown
+        <div></div>);
+    }
+
     return(
         <div>
             <div className="flex justify-center items-center">
                 <p className='text-center font-black text-blue-600 text-xl'>{formState.title}</p>
             </div>
-            <div>
-                <label>{formState.formfields[inputNumber].label}</label>
-                <input
-                    className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
-                    type={formState.formfields[inputNumber].type}
-                    value={formState.formfields[inputNumber].value}
-                    onChange={(e) => {
-                        updateField(e.target.value, formState.formfields[inputNumber].id);
-                    }}
-                    />
-            </div>
+            {renderFormField()}
             <div className='w-full flex justify-between'>
                 <button 
                 className='text-xl text-blue-600'

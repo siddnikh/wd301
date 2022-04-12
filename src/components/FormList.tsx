@@ -1,18 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { useQueryParams, navigate, Link } from 'raviger';
-
-interface formField {
-    id: number;
-    label: string;
-    type: string;
-    value: string;
-}
-
-interface formData {
-    id: number;
-    title: string;
-    formfields: formField[];
-}
+import { formData } from '../types/formTypes';
 
 export default function FormList(){
 
