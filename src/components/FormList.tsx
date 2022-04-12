@@ -17,7 +17,7 @@ interface formData {
 export default function FormList(){
 
     const [searchString, setSearchString] = useState(""); //initial search field
-    const [{search}, setQuery] = useQueryParams();
+    const [{search}] = useQueryParams();
 
     const getLocalForms : () => formData[] = () => {
         const localForms = localStorage.getItem("savedForms");
@@ -74,8 +74,8 @@ export default function FormList(){
             </form>
             {localForms.filter((form) => {return form.title.toLowerCase().includes(search?.toLowerCase() || "")}
                 ).map((field) => (
-            <div className="mt-6 flex items-center">
-                <div className="flex-1" key={field.id}>
+            <div className="mt-6 flex items-center" key={field.id}>
+                <div className="flex-1">
                     <p
                     className="p-2 m-2 w-full">{field.title}</p>
                 </div>

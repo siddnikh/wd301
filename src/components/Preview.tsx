@@ -24,27 +24,24 @@ export default function Preview(props: {id : number}) {
         return currentForm;
     }
 
-    const [formState, setFormState] = useState(() => getForm());
+    const [formState] = useState(() => getForm());
     const [inputNumber, setInputNumber] = useState(0);
+    const [answers, setAnswers] = useState<string[]>([]);
 
-    const updateField = (value: any, id: number) => {
-        setFormState({
-            ...formState,
-            formfields: 
-            formState.formfields.map((field) => {
-                if(field.id === id) return {...field, value: value};
-                return field;
-            }),
-        });
-    }
-
-    const saveFormData : () => void = () => {
-        const localForms = localStorage.getItem("savedForms");
-        const localFormsJSON = localForms ? JSON.parse(localForms) : {};
-
-        const updatedForms = localFormsJSON.map((form : formData) => form.id === formState.id ? formState : form);
-        localStorage.setItem("savedForms", JSON.stringify(updatedForms));
-        navigate('/');
+    const updateAnswer = (value: string, index : number) => {
+        const newArray = answers.slice();
+        newArray[index] = value;
+        setAnswers(
+           newArray
+        );
+        // setFormState({
+        //     ...formState,
+        //     formfields: 
+        //     formState.formfields.map((field) => {
+        //         if(field.id === id) return {...field, value: value};
+        //         return field;
+        //     }),
+        // });
     }
 
     return(
@@ -57,9 +54,9 @@ export default function Preview(props: {id : number}) {
                 <input
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                     type={formState.formfields[inputNumber].type}
-                    value={formState.formfields[inputNumber].value}
+                    value={answers.length > inputNumber ? answers[inputNumber] : ""}
                     onChange={(e) => {
-                        updateField(e.target.value, formState.formfields[inputNumber].id);
+                        updateAnswer(e.target.value, inputNumber);
                     }}
                     />
             </div>
@@ -73,7 +70,7 @@ export default function Preview(props: {id : number}) {
                 {(inputNumber === formState.formfields.length - 1) ? 
                 <button 
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-                onClick={() => saveFormData()}
+                onClick={() => navigate('/')}
                 >Save</button>
                 :
                 <button

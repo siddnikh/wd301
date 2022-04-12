@@ -99,15 +99,6 @@ export default function Form(props: {id : number}){
         }
     });
 
-    const clearFormData = () => {
-        setFormState({
-            ...formState,
-            formfields: formState.formfields.map((field) => {
-                return {...field, value: ""}
-            })
-        });
-    }
-
     return(
         <div>
             <div>
@@ -122,8 +113,8 @@ export default function Form(props: {id : number}){
                 />
             </div>
         {formState.formfields.map((field) => (
-            <div className="flex">
-                <div className="flex-1" key={field.id}>
+            <div className="flex" key={field.id}>
+                <div className="flex-1">
                     <input
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                     type={field.type}
@@ -176,10 +167,6 @@ export default function Form(props: {id : number}){
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
           href="/forms"
           >Close Form</Link>
-          <button 
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
-          onClick={() => clearFormData()}
-          >Clear Form</button>
           </div>
         );
 }
