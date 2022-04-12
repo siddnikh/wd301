@@ -50,8 +50,8 @@ export default function FormList(props: {editFormCB: (id : number) => void, clos
                 <p className='text-center text-xl'>List of forms saved in local storage:</p>
             </div>
             {localForms.map((field) => (
-            <div className="mt-6 flex items-center">
-                <div className="flex-1" key={field.id}>
+            <div className="mt-6 flex items-center" key={field.id}>
+                <div className="flex-1">
                     <p
                     className="p-2 m-2 w-full">{field.title}</p>
                 </div>

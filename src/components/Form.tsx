@@ -120,8 +120,8 @@ export default function Form(props: {closeFormCB : () => void, id : number}){
                 />
             </div>
         {formState.formfields.map((field) => (
-            <div className="flex">
-                <div className="flex-1" key={field.id}>
+            <div className="flex" key={field.id}>
+                <div className="flex-1">
                     <label>{field.label}</label>
                     <input
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
