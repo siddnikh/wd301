@@ -5,7 +5,7 @@ import { formData } from '../types/formTypes';
 export default function FormList(){
 
     const [searchString, setSearchString] = useState(""); //initial search field
-    const [{search}, setQuery] = useQueryParams();
+    const [{search}] = useQueryParams();
 
     const getLocalForms : () => formData[] = () => {
         const localForms = localStorage.getItem("savedForms");
