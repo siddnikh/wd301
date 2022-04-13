@@ -49,6 +49,7 @@ export default function Preview(props: {id : number}) {
             <div className="flex justify-center items-center">
                 <p className='text-center font-black text-blue-600 text-xl'>{formState.title}</p>
             </div>
+            {formState.formfields.length !== 0 ? 
             <div>
                 <label>{formState.formfields[inputNumber].label}</label>
                 <input
@@ -61,6 +62,7 @@ export default function Preview(props: {id : number}) {
                     }}
                     />
             </div>
+            : []}
             <div className='w-full flex justify-between'>
                 <button 
                 className='text-xl text-blue-600'
@@ -68,7 +70,7 @@ export default function Preview(props: {id : number}) {
                     if(inputNumber !== 0) setInputNumber(inputNumber - 1);
                 }}
                 >&#x2190;</button>
-                {(inputNumber === formState.formfields.length - 1) ? 
+                {(inputNumber === formState.formfields.length - 1 || formState.formfields.length === 0) ? 
                 <button 
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
                 onClick={() => navigate('/')}
