@@ -52,6 +52,7 @@ export default function Preview(props: {id : number}) {
             <div>
                 <label>{formState.formfields[inputNumber].label}</label>
                 <input
+                    required
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                     type={formState.formfields[inputNumber].type}
                     value={answers.length > inputNumber ? answers[inputNumber] : ""}
