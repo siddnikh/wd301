@@ -27,6 +27,8 @@ export default function Preview(props: {id : number}) {
 
 
     const renderFormField = () => {
+        if(formState.formfields.length === 0)
+        return(<div></div>);
         let currentFormField = formState.formfields[inputNumber]
         if(currentFormField.kind === 'text' || currentFormField.kind === 'textarea'){
             return(<div>
@@ -92,17 +94,6 @@ export default function Preview(props: {id : number}) {
                         labelledBy="Select"
                         onChange={setSelected}
                     />
-                    {/* <select
-                    multiple
-                    autoFocus
-                    onChange={(e) => {
-                        updateField(e.target.value, currentFormField.id);
-                    }}
-                    className="border-5 border-blue-600 rounded-lg p-2 m-2 w-full">
-                        {currentFormField.options.map((option) => {
-                            return(<option value={option}>{option}</option>);
-                        })}
-                    </select> */}
                 </div>
             );
         }
@@ -121,7 +112,7 @@ export default function Preview(props: {id : number}) {
                     if(inputNumber !== 0) setInputNumber(inputNumber - 1);
                 }}
                 >&#x2190;</button>
-                {(inputNumber === formState.formfields.length - 1) ? 
+                {(inputNumber === formState.formfields.length - 1 || formState.formfields.length === 0) ? 
                 <button 
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
                 onClick={() => navigate('/')}
