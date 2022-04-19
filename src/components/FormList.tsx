@@ -1,12 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useReducer} from 'react';
 import { useQueryParams, navigate, Link } from 'raviger';
 import { formData } from '../types/formTypes';
+import { LocalFormActions } from '../types/formActions';
 
 export default function FormList(){
 
-    const [searchString, setSearchString] = useState(""); //initial search field
-    const [{search}] = useQueryParams();
-
+    // functions
     const getLocalForms : () => formData[] = () => {
         const localForms = localStorage.getItem("savedForms");
         const savedForms = localForms ? JSON.parse(localForms) : [];
@@ -14,25 +13,32 @@ export default function FormList(){
         return savedForms;
     }
 
-    const [localForms, setLocalForms] = useState(() => getLocalForms());
+    // action reducer pattern
+    const localFormReducer : (state: formData[], action: LocalFormActions) => formData[] = (state, action) => {
+        switch(action.type){
+            //adding a new form to local forms
+            case "add_form":
+                const newForm: formData = {
+                    id: Number(new Date()),
+                    title: "Untitled Form",
+                    formfields: []
+                };
+                return([...state, newForm]);
+            //removing a certain form from local storage
+            case "remove_form":
+                return state.filter((form) => form.id !== action.id);
+            default:
+                return state;
+        }
+    }
+
+    // state and initial variables
+    const [searchString, setSearchString] = useState(""); //initial search field
+    const [{search}] = useQueryParams();
+    const [localForms, localFormDispatch] = useReducer(localFormReducer, getLocalForms());
     const [localFormsCount, setLocalFormsCount] = useState(localForms.length);
 
-    const removeLocalForm : (id : number) => void = (id) => {
-        const updatedForms = localForms.filter((form) => form.id !== id)
-        
-        setLocalForms(updatedForms);
-        localStorage.setItem("savedForms", JSON.stringify(updatedForms));
-    }
-
-    const addNewForm : () => void = () => {
-        const newForm: formData = {
-            id: Number(new Date()),
-            title: "Untitled Form",
-            formfields: []
-        };
-        setLocalForms([...localForms, newForm]);
-    }
-
+    // background operations
     useEffect(() => {
         localStorage.setItem("savedForms", JSON.stringify(localForms));
         if(localFormsCount < localForms.length){
@@ -60,29 +66,29 @@ export default function FormList(){
                     onChange={(e) => {setSearchString(e.target.value)}}
                 />
             </form>
-            {localForms.filter((form) => {return form.title.toLowerCase().includes(search?.toLowerCase() || "")}
-                ).map((field) => (
-            <div className="mt-6 flex items-center" key={field.id}>
+            {localForms.filter((form: formData) => {return form.title.toLowerCase().includes(search?.toLowerCase() || "")}
+                ).map((form: formData) => (
+            <div className="mt-6 flex items-center" key={form.id}>
                 <div className="flex-1">
                     <p
-                    className="p-2 m-2 w-full">{field.title}</p>
+                    className="p-2 m-2 w-full">{form.title}</p>
                 </div>
                 <div>
                     <Link 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    href={`/preview/${field.id}`}
+                    href={`/preview/${form.id}`}
                     >Preview</Link>
                 </div>
                 <div>
                     <button 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    onClick={() => removeLocalForm(field.id)}
+                    onClick={() => localFormDispatch({type: "remove_form", id: form.id})}
                     >Remove</button>
                 </div>
                 <div>
                     <Link 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    href={`/form/${field.id}`}
+                    href={`/form/${form.id}`}
                     >Edit</Link>
                 </div>
             </div>
@@ -94,7 +100,7 @@ export default function FormList(){
           >Home</Link>
           <button 
           className="mt-9 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-          onClick={() => addNewForm()}
+          onClick={() => localFormDispatch({type: "add_form"})}
           >Add Form</button>
           
         </div>

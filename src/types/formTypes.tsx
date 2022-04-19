@@ -1,11 +1,4 @@
 
-// export interface formField {
-//     id: number;
-//     label: string;
-//     type: textFieldTypes;
-//     value: string;
-// }
-
 export type textFieldTypes = "text" | "email" | "tel" | "date";
 export type formKinds = "text" | "dropdown" | "radio" | "textarea" | "multi";
 export type formField = TextField | DropDownField | RadioField | TextAreaField | MultiSelectField;

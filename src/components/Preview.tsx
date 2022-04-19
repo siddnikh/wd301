@@ -1,5 +1,5 @@
 import { navigate } from 'raviger';
-import React, { useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { formData } from '../types/formTypes';
 import { MultiSelect } from "react-multi-select-component";
 
@@ -12,19 +12,22 @@ export default function Preview(props: {id : number}) {
         return currentForm;
     }
 
+    type updateAnswerAction = {
+        value: string,
+        index: number
+    }
+    // action reducer pattern
+    const answersReducer : (state: string[], action: updateAnswerAction) => string[] = (state, action) => {
+        let newArray = state.slice();
+        newArray[action.index] = action.value;
+        return(newArray);
+    }
+
+    //state and initial variables
     const [formState] = useState(() => getForm());
     const [inputNumber, setInputNumber] = useState(0);
     const [selected, setSelected] = useState([]);
-    const [answers, setAnswers] = useState<string[]>([]);
-
-    const updateAnswer = (value: string, index : number) => {
-        const newArray = answers.slice();
-        newArray[index] = value;
-        setAnswers(
-           newArray
-        );
-    }
-
+    const [answers, answersDispatch] = useReducer(answersReducer, [] as string[]);
 
     const renderFormField = () => {
         if(formState.formfields.length === 0)
@@ -38,7 +41,7 @@ export default function Preview(props: {id : number}) {
                     type={currentFormField.fieldType}
                     value={answers[inputNumber]}
                     onChange={(e) => {
-                        updateAnswer(e.target.value, inputNumber);
+                        answersDispatch({value: e.target.value, index: inputNumber});
                     }}
                     />
                  </div>);
@@ -51,7 +54,7 @@ export default function Preview(props: {id : number}) {
                 autoFocus
                 value={answers[inputNumber]}
                 onChange={(e) => {
-                    updateAnswer(e.target.value, inputNumber);
+                    answersDispatch({value: e.target.value, index: inputNumber});
                 }}
                 className="border-5 border-blue-600 rounded-lg p-2 m-2 w-full">
                     {React.Children.toArray(currentFormField.options.map((option) => {
@@ -70,7 +73,7 @@ export default function Preview(props: {id : number}) {
                                 <>
                                 <input
                                 onChange={(e) => {
-                                    updateAnswer(e.target.value, inputNumber);
+                                    answersDispatch({value: e.target.value, index: inputNumber});
                                 }}
                                className="rounded-full h-4 w-4 border border-gray-300  checked:bg-blue-600 mt-1 mr-1 cursor-pointer"
                                 type="radio"

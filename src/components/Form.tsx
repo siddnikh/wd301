@@ -1,9 +1,11 @@
 import { Link } from 'raviger';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useReducer } from 'react';
 import { textFieldTypes, formField, formKinds, formData, TextField } from '../types/formTypes';
+import { FormActions } from '../types/formActions';
 
 export default function Form(props: {id : number}){
 
+    //functions
     const saveLocalForms : (localForms: formData[]) => void = (localForms) => {
         localStorage.setItem("savedForms", JSON.stringify(localForms));
     }
@@ -22,88 +24,7 @@ export default function Form(props: {id : number}){
         return (localForms.filter((form) => form.id === props.id)[0])
     }
 
-    const [formState, setFormState] = useState(() => getCurrentForm()); 
-    const [newFieldState, setNewField] = useState("");
-    const [formKind, setFormKind] = useState("dropdown" as formKinds);
-    const [fieldType, setFieldType] = useState("text" as textFieldTypes);
-    const [fieldOptions, setFieldOptions] = useState([] as string[])
-    const titleRef = useRef<HTMLInputElement>(null);
-
-    const addFormField = () => {
-        let newFormField : {
-            kind : formKinds;
-            id : number;
-            label : string;
-            fieldType? : textFieldTypes;
-            options? : string[];
-            value : string
-        };
-
-        switch(formKind){
-            case "text":
-                case "textarea":
-                    newFormField = {
-                        kind : formKind,
-                        id: Number(new Date()),
-                        label: newFieldState,
-                        fieldType: fieldType,
-                        value: "",
-                    }
-                    break;
-            case "dropdown":
-                case "radio":
-                    case "multi":
-                        newFormField = {
-                        kind : formKind,
-                        id: Number(new Date()),
-                        label: newFieldState,
-                        options : fieldOptions,
-                        value: "",
-                    }
-                        break;
-        }
-
-        setFormState({
-            ...formState,
-            formfields: [
-                ...formState.formfields,
-                newFormField as formField,
-            ]
-        });
-        setNewField("");
-    };
-
-    const updateOptions = (options : string, id : number) => { // for already existing form field: so we update formState
-        let x = options.split(",");
-        setFormState({
-            ...formState,
-            formfields: 
-            formState.formfields.map((field) => {
-                if(field.id === id) return {...field, options : x};
-                return field;
-            })
-        })
-    }
-
-    const updateField = (label: string, id: number) => {
-        setFormState({
-            ...formState,
-            formfields: 
-            formState.formfields.map((field) => {
-                if(field.id === id) return {...field, label: label};
-                return field;
-            }),
-        });
-    }
-
-    const removeFormField = (id: number) => {
-        setFormState({
-            ...formState,
-            formfields: formState.formfields.filter((field) => field.id !== id)
-        });
-    }
-    
-    const saveFormData = () => {
+    const saveFormData = (formState: formData) => {
         const localForms = getLocalForms();
         if(localForms.length === 0){
             saveLocalForms([formState]);
@@ -115,6 +36,85 @@ export default function Form(props: {id : number}){
         saveLocalForms(updatedLocalForms);
     }
 
+    //action reducer pattern
+    const formReducer: (state: formData, action: FormActions) => formData = (state, action) => {
+        switch(action.type){
+            //Add a field to formstate
+            case "add_field": 
+                let newFormField : formField;
+                switch(formKind){
+                    case "text":
+                        newFormField = {
+                            kind : formKind,
+                            id: Number(new Date()),
+                            label: newFieldState,
+                            fieldType: fieldType,
+                            value: "",
+                        }
+                        break;
+                    case "textarea":
+                        newFormField = {
+                            kind : formKind,
+                            id: Number(new Date()),
+                            label: newFieldState,
+                            fieldType: "textarea",
+                            value: "",
+                        }
+                        break;
+                    case "dropdown":
+                        case "radio":
+                            case "multi":
+                                newFormField = {
+                                kind : formKind,
+                                id: Number(new Date()),
+                                label: newFieldState,
+                                options : fieldOptions,
+                                value: "",
+                            }
+                                break;
+                }
+                let newState: formData = {...state,
+                                        formfields: [...state.formfields, 
+                                            newFormField as formField]}
+                setNewField("");
+                setFieldOptions([]);
+                return(newState);
+
+                //Update an existing field in formstate
+                case "update_field":
+                    return({
+                        ...state,
+                        formfields: state.formfields.map((field) => field.id === action.id ? {...field, label: action.value} : field)
+                    });
+                
+                //Updating options of a field in formstate
+                case "update_options":
+                    let x = action.options.split(",");
+                    return({
+                        ...state,
+                        formfields:
+                        state.formfields.map((field) => field.id === action.id ? {...field, options: x} : field)
+                    });
+                //Removing a field
+                case "remove_field":
+                    return({...state,
+                    formfields: state.formfields.filter((field) => field.id !== action.id)});
+                
+                //Changing the title of form
+                case "change_title":
+                    return({...state, title: action.value});
+        }
+    }
+
+    //state variables
+    const [newFieldState, setNewField] = useState("");
+    const [formKind, setFormKind] = useState("dropdown" as formKinds);
+    const [fieldType, setFieldType] = useState("text" as textFieldTypes);
+    const [fieldOptions, setFieldOptions] = useState([] as string[])
+    const titleRef = useRef<HTMLInputElement>(null);
+    const [formState, formDispatch] = useReducer(formReducer, getCurrentForm())
+
+    //background operations
     useEffect(() => {
         titleRef.current?.focus();
         document.title = "Form Editor";
@@ -122,7 +122,7 @@ export default function Form(props: {id : number}){
     }, [])
 
     useEffect(() => {
-        let timeout = setTimeout(() => {saveFormData()}, 1000);
+        let timeout = setTimeout(() => {saveFormData(formState)}, 1000);
         return () => {
             clearTimeout(timeout);
         }
@@ -137,7 +137,7 @@ export default function Form(props: {id : number}){
                 value={formState.title}
                 ref={titleRef}
                 onChange={(e) => {
-                    setFormState({...formState, title: e.target.value})
+                    formDispatch({type: "change_title", value: e.target.value});
                 }}
                 />
             </div>
@@ -150,7 +150,7 @@ export default function Form(props: {id : number}){
                 type={(field as TextField).fieldType}
                 value={field.label}
                 onChange={(e) => {
-                    updateField(e.target.value, field.id);
+                    formDispatch({type: "update_field", value: e.target.value, id: field.id});
                 }}
                 />
                 </div> 
@@ -162,7 +162,7 @@ export default function Form(props: {id : number}){
                     type="text"
                     value={field.label}
                     onChange={(e) => {
-                    updateField(e.target.value, field.id);
+                        formDispatch({type: "update_field", value: e.target.value, id: field.id});
                 }}
                 />
                 <label >Options for above field:</label>
@@ -172,7 +172,7 @@ export default function Form(props: {id : number}){
                     type="text"
                     value={field.options}
                     onChange={(e) => {
-                    updateOptions(e.target.value, field.id);
+                        formDispatch({type: "update_options", options: e.target.value, id: field.id});
                 }}
                 />
                 </div>
@@ -180,7 +180,7 @@ export default function Form(props: {id : number}){
                 <div>
                     <button 
                     className="bg-blue-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    onClick={() => removeFormField(field.id)}
+                    onClick={() => formDispatch({type: "remove_field", id: field.id})}
                     >Remove</button>
                 </div>
             </div>
@@ -233,13 +233,13 @@ export default function Form(props: {id : number}){
             <div key="100">
                 <button 
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 mt-3 rounded"
-                onClick={() => addFormField()}
+                onClick={() => formDispatch({type: "add_field"})}
                 >Add Field</button>
             </div>
             </div>
           <button 
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-          onClick={() => saveFormData()}
+          onClick={() => saveFormData(formState)}
           >Save</button>
           <Link
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 
