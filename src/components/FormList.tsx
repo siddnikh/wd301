@@ -1,12 +1,12 @@
 import React, {useState, useEffect, useReducer} from 'react';
 import { useQueryParams, navigate, Link } from 'raviger';
-import { formData } from '../types/formTypes';
+import { formData, Form } from '../types/formTypes';
 import { LocalFormActions } from '../types/formActions';
 
 export default function FormList(){
 
     // functions
-    const getLocalForms : () => formData[] = () => {
+    const getLocalForms : () => Form[] = () => {
         const localForms = localStorage.getItem("savedForms");
         const savedForms = localForms ? JSON.parse(localForms) : [];
 
@@ -14,7 +14,7 @@ export default function FormList(){
     }
 
     // action reducer pattern
-    const localFormReducer : (state: formData[], action: LocalFormActions) => formData[] = (state, action) => {
+    const localFormReducer : (state: Form[], action: LocalFormActions) => Form[] = (state, action) => {
         switch(action.type){
             //adding a new form to local forms
             case "add_form":
@@ -27,6 +27,8 @@ export default function FormList(){
             //removing a certain form from local storage
             case "remove_form":
                 return state.filter((form) => form.id !== action.id);
+            case "set_forms":
+                return action.forms;
             default:
                 return state;
         }
@@ -39,6 +41,17 @@ export default function FormList(){
     const [localFormsCount, setLocalFormsCount] = useState(localForms.length);
 
     // background operations
+
+    const fetchForms = async () => {
+        const response = await fetch("https://tsapi.coronasafe.live/api/mock_test/");
+        const jsonData = await response.json();
+        localFormDispatch({type: "set_forms", forms: jsonData})
+    }
+
+    useEffect(() => {
+        fetchForms();
+    }, []);
+
     useEffect(() => {
         localStorage.setItem("savedForms", JSON.stringify(localForms));
         if(localFormsCount < localForms.length){
@@ -49,7 +62,7 @@ export default function FormList(){
         else{
             setLocalFormsCount(localForms.length);
         }
-    }, [localForms, localFormsCount])
+    }, [localForms, localFormsCount]);
 
     return(
         <div>
@@ -66,8 +79,8 @@ export default function FormList(){
                     onChange={(e) => {setSearchString(e.target.value)}}
                 />
             </form>
-            {localForms.filter((form: formData) => {return form.title.toLowerCase().includes(search?.toLowerCase() || "")}
-                ).map((form: formData) => (
+            {localForms.filter((form: Form) => {return form.title.toLowerCase().includes(search?.toLowerCase() || "")}
+                ).map((form: Form) => (
             <div className="mt-6 flex items-center" key={form.id}>
                 <div className="flex-1">
                     <p

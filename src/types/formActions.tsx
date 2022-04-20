@@ -1,3 +1,4 @@
+import { Form } from '../types/formTypes';
 
 type AddField = {
     type: "add_field";
@@ -36,4 +37,9 @@ type AddForm = {
     type: "add_form";
 }
 
-export type LocalFormActions = RemoveForm | AddForm;
+type setForms = {
+    type: "set_forms";
+    forms: Form[];
+}
+
+export type LocalFormActions = RemoveForm | AddForm | setForms;

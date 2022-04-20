@@ -8,6 +8,8 @@ export interface formData {
     formfields: formField[];
 }
 
+export type Form = Omit<formData, "formfields">;
+
 export type TextField = {
     kind : 'text'; 
     id : number;
