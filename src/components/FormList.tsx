@@ -1,7 +1,9 @@
 import React, {useState, useEffect, useReducer} from 'react';
 import { useQueryParams, navigate, Link } from 'raviger';
-import { formData, Form } from '../types/formTypes';
+import { Form } from '../types/formTypes';
 import { LocalFormActions } from '../types/formActions';
+import CreateForm from './CreateForm';
+import Modal from './common/Modal'
 
 export default function FormList(){
 
@@ -17,13 +19,13 @@ export default function FormList(){
     const localFormReducer : (state: Form[], action: LocalFormActions) => Form[] = (state, action) => {
         switch(action.type){
             //adding a new form to local forms
-            case "add_form":
-                const newForm: formData = {
-                    id: Number(new Date()),
-                    title: "Untitled Form",
-                    formfields: []
-                };
-                return([...state, newForm]);
+            // case "add_form":
+            //     const newForm: formData = {
+            //         id: Number(new Date()),
+            //         title: "Untitled Form",
+            //         formfields: []
+            //     };
+            //     return([...state, newForm]);
             //removing a certain form from local storage
             case "remove_form":
                 return state.filter((form) => form.id !== action.id);
@@ -35,6 +37,7 @@ export default function FormList(){
     }
 
     // state and initial variables
+    const [newForm, setNewForm] = useState<boolean>(false);
     const [searchString, setSearchString] = useState(""); //initial search field
     const [{search}] = useQueryParams();
     const [localForms, localFormDispatch] = useReducer(localFormReducer, getLocalForms());
@@ -55,7 +58,7 @@ export default function FormList(){
     useEffect(() => {
         localStorage.setItem("savedForms", JSON.stringify(localForms));
         if(localFormsCount < localForms.length){
-            let x: number = localForms[localForms.length - 1].id;
+            let x: number = localForms[localForms.length - 1].id!;
             navigate(`/form/${x}`);
             setLocalFormsCount(localForms.length);
         }
@@ -66,7 +69,7 @@ export default function FormList(){
 
     return(
         <div>
-            <div className="flex justify-center items-center">
+            <div className="my-6 flex justify-center items-center">
                 <p className='text-center text-xl'>List of forms saved in local storage:</p>
             </div>
             <form>
@@ -95,7 +98,7 @@ export default function FormList(){
                 <div>
                     <button 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    onClick={() => localFormDispatch({type: "remove_form", id: form.id})}
+                    onClick={() => localFormDispatch({type: "remove_form", id: form.id!})}
                     >Remove</button>
                 </div>
                 <div>
@@ -107,15 +110,13 @@ export default function FormList(){
             </div>
           ))}
           <hr className='mt-5' />
-          <Link
-          className="mt-9 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-          href="/"
-          >Home</Link>
           <button 
           className="mt-9 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-          onClick={() => localFormDispatch({type: "add_form"})}
+          onClick={() => setNewForm(true)}
           >Add Form</button>
-          
+          <Modal open={newForm} closeFormCB={() => setNewForm(false)}>
+              <CreateForm/>
+          </Modal>
         </div>
     )
 

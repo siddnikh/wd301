@@ -8,7 +8,21 @@ export interface formData {
     formfields: formField[];
 }
 
-export type Form = Omit<formData, "formfields">;
+export type Form = {
+    id? : number;
+    title: string;
+    description? : string;
+    is_public? : boolean;
+}
+
+export type Error<T> = Partial<Record<keyof T, string>>;
+
+export const validateForm = (form: Form) => {
+    const errors : Error<Form> = {};
+    if(form.title.length < 1) errors.title = "There should be a form title.";
+    if(form.title.length > 100) errors.title = "The title should be less than 100 characters.";
+    return errors;
+} 
 
 export type TextField = {
     kind : 'text'; 

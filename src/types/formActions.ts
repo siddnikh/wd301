@@ -1,4 +1,4 @@
-import { Form } from '../types/formTypes';
+import { Form } from './formTypes';
 
 type AddField = {
     type: "add_field";
