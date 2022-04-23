@@ -4,6 +4,8 @@ import { Form } from '../types/formTypes';
 import { LocalFormActions } from '../types/formActions';
 import CreateForm from './CreateForm';
 import Modal from './common/Modal'
+import { listForms } from '../utils/apiUtils';
+import { Pagination } from '../types/common';
 
 export default function FormList(){
 
@@ -46,9 +48,13 @@ export default function FormList(){
     // background operations
 
     const fetchForms = async () => {
-        const response = await fetch("https://tsapi.coronasafe.live/api/mock_test/");
-        const jsonData = await response.json();
-        localFormDispatch({type: "set_forms", forms: jsonData})
+
+        try{
+            const data: Pagination<Form> = await listForms({offset: 0});
+            localFormDispatch({type: "set_forms", forms: data.results})
+        } catch(error) {
+            console.error(error);
+        }
     }
 
     useEffect(() => {

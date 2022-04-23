@@ -13,6 +13,9 @@ export type Form = {
     title: string;
     description? : string;
     is_public? : boolean;
+    created_by? : number;
+    created_date? : string;
+    modified_date? : string;
 }
 
 export type Error<T> = Partial<Record<keyof T, string>>;

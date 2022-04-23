@@ -1,3 +1,4 @@
+import { PaginationParams } from "../types/common";
 import { Form } from "../types/formTypes";
 import { checkLogin } from "./loginUtils";
 
@@ -5,21 +6,21 @@ import { checkLogin } from "./loginUtils";
 type requests = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 const API_BASE_URL = 'https://tsapi.coronasafe.live/api/'
 
-export const request = async (endpoint: string, method: requests = 'GET', data: any) => {
+export const request = async (endpoint: string, method: requests = 'GET', data: any = {}) => {
 
     let url;
     let payload: string;
     if(method === 'GET'){
         const requestParams = data ? 
         `${Object.keys(data).map(key => `${key}=${data[key]}`).join('&')}` : ""
-        url = `${API_BASE_URL}${endpoint}${requestParams}`;
+        url = `${API_BASE_URL}${endpoint}?${requestParams}`;
         payload = "";
     } else {
         url = `${API_BASE_URL}${endpoint}`;
         payload = data ? JSON.stringify(data) : "";
     }
-    console.log(window.btoa("nono123:yesYES123"));
-    const auth = checkLogin() ? ("Bearer " + localStorage.getItem("authToken")) : `Basic ${window.btoa("nono123:yesYES123")}`;
+
+    const auth = checkLogin() ? `Token ${localStorage.getItem("authToken")}` : `Basic ${window.btoa("nono123:yesYES123")}`;
 
     const response = await fetch(
         url, {
@@ -46,4 +47,8 @@ export const createForm = (form: Form) => {
 
 export const login = (username: string, password: string) => {
     return request('auth-token/', 'POST', {username, password});
+}
+
+export const listForms = (pageParams: PaginationParams) => {
+    return request('forms/', 'GET', pageParams);
 }
