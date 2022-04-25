@@ -65,7 +65,7 @@ export default function FormList(){
                 <p className='text-center text-xl'>List of forms saved in local storage:</p>
             </div>
             <form>
-                <label>Search:</label>
+                <label htmlFor='Search Forms'>Search:</label>
                 <input
                     name="search"
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"

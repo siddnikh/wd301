@@ -132,4 +132,4 @@
 //     </div>
 //     )
 // }
-export const x = 0;
+ export const x = 0;

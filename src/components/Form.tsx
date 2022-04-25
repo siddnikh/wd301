@@ -113,7 +113,7 @@ export default function Form(props: {id : number}){ //here id is the form_pk
                         formDispatch({type: "update_field", value: e.target.value, id: field.id});
                 }}
                 />
-                <label >Options for above field:</label>
+                <label htmlFor='Options for the above field'>Options for above field:</label>
                 <input
                     placeholder='Options to give: separate with comma and no spaces.'
                     className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"

@@ -36,7 +36,7 @@ export default function CreateForm(){
             </div>
             <form onSubmit={handleSubmit}>
             <div className="m-2">
-                <label>Title</label>
+                <label htmlFor="Title of Form">Title</label>
                 {errors.title ? <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                     <span className="block sm:inline">{errors.title}</span>
                 </div> : []}
@@ -48,7 +48,7 @@ export default function CreateForm(){
                 />
             </div>
             <div className="m-2">
-                <label>Description</label>
+                <label htmlFor="Description of form">Description</label>
                 <input
                 className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                 type="text"
@@ -57,7 +57,7 @@ export default function CreateForm(){
                 />
             </div>
             <div className="m-2">
-                <label>Is Public?</label>
+                <label htmlFor="Should the form be public?">Is Public?</label>
                 <input
                 className="ml-5"
                 type="checkbox"
