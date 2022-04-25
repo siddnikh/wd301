@@ -1,5 +1,5 @@
 import { PaginationParams } from "../types/common";
-import { Form } from "../types/formTypes";
+import { Form, FormField } from "../types/formTypes";
 import { checkLogin } from "./loginUtils";
 
 
@@ -32,7 +32,7 @@ export const request = async (endpoint: string, method: requests = 'GET', data: 
             body: (method !== 'GET') ? payload : null
         });
 
-    if(response.ok){
+    if(response.ok){ 
         const json = await response.json();
         return json;
     } else {
@@ -51,4 +51,24 @@ export const login = (username: string, password: string) => {
 
 export const listForms = (pageParams: PaginationParams) => {
     return request('forms/', 'GET', pageParams);
+}
+
+export const deleteForm = (formID: number) => {
+    return request(`forms/${formID}/`, 'DELETE');
+}
+
+export const getFormFields = (formID: number) => {
+    return request(`forms/${formID}/fields`, 'GET');
+}
+
+export const createFormField = (formID: number, field: FormField) => {
+    return request(`forms/${formID}/fields/`, 'POST', field);
+}
+
+export const updateField = (formID: number, fieldID: number, field: FormField) => {
+    return request(`forms/${formID}/fields/${fieldID}/`, 'PATCH', field);
+}
+
+export const removeField = (formID: number, fieldID: number) => {
+    return request(`forms/${formID}/fields/${fieldID}/`, 'DELETE');
 }

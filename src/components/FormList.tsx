@@ -1,10 +1,9 @@
-import React, {useState, useEffect, useReducer} from 'react';
-import { useQueryParams, navigate, Link } from 'raviger';
+import React, {useState, useEffect} from 'react';
+import { useQueryParams, Link } from 'raviger';
 import { Form } from '../types/formTypes';
-import { LocalFormActions } from '../types/formActions';
 import CreateForm from './CreateForm';
 import Modal from './common/Modal'
-import { listForms } from '../utils/apiUtils';
+import { listForms, deleteForm } from '../utils/apiUtils';
 import { Pagination } from '../types/common';
 
 export default function FormList(){
@@ -17,24 +16,12 @@ export default function FormList(){
         return savedForms;
     }
 
-    // action reducer pattern
-    const localFormReducer : (state: Form[], action: LocalFormActions) => Form[] = (state, action) => {
-        switch(action.type){
-            //adding a new form to local forms
-            // case "add_form":
-            //     const newForm: formData = {
-            //         id: Number(new Date()),
-            //         title: "Untitled Form",
-            //         formfields: []
-            //     };
-            //     return([...state, newForm]);
-            //removing a certain form from local storage
-            case "remove_form":
-                return state.filter((form) => form.id !== action.id);
-            case "set_forms":
-                return action.forms;
-            default:
-                return state;
+    const removeForm = async (id: number, state: Form[], setLocalFormsCB: (state: Form[]) => void) => {
+        try{
+            await deleteForm(id);
+            setLocalFormsCB(state.filter((form) => form.id !== id));
+        } catch(error) {
+            console.error(error);
         }
     }
 
@@ -42,20 +29,19 @@ export default function FormList(){
     const [newForm, setNewForm] = useState<boolean>(false);
     const [searchString, setSearchString] = useState(""); //initial search field
     const [{search}] = useQueryParams();
-    const [localForms, localFormDispatch] = useReducer(localFormReducer, getLocalForms());
+    const [localForms, setLocalForms] = useState(() => getLocalForms());
     const [localFormsCount, setLocalFormsCount] = useState(localForms.length);
 
     // background operations
 
     const fetchForms = async () => {
-
         try{
             const data: Pagination<Form> = await listForms({offset: 0});
-            localFormDispatch({type: "set_forms", forms: data.results})
+            setLocalForms(data.results);
         } catch(error) {
             console.error(error);
         }
-    }
+    };
 
     useEffect(() => {
         fetchForms();
@@ -64,8 +50,8 @@ export default function FormList(){
     useEffect(() => {
         localStorage.setItem("savedForms", JSON.stringify(localForms));
         if(localFormsCount < localForms.length){
-            let x: number = localForms[localForms.length - 1].id!;
-            navigate(`/form/${x}`);
+            //let x: number = localForms[localForms.length - 1].id!;
+            //navigate(`/form/${x}`);
             setLocalFormsCount(localForms.length);
         }
         else{
@@ -104,13 +90,13 @@ export default function FormList(){
                 <div>
                     <button 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    onClick={() => localFormDispatch({type: "remove_form", id: form.id!})}
+                    onClick={() => removeForm(form.id!, localForms, setLocalForms)}
                     >Remove</button>
                 </div>
                 <div>
                     <Link 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 rounded"
-                    href={`/form/${form.id}`}
+                    href={`/forms/${form.id}`}
                     >Edit</Link>
                 </div>
             </div>

@@ -1,153 +1,101 @@
 import { Link } from 'raviger';
 import React, { useEffect, useState, useRef, useReducer } from 'react';
-import { textFieldTypes, formField, formKinds, formData, TextField } from '../types/formTypes';
+import { FormField, fieldKind } from '../types/formTypes';
 import { FormActions } from '../types/formActions';
+import { getFormFields, createFormField, updateField, removeField } from '../utils/apiUtils';
 
-export default function Form(props: {id : number}){
+//this file is a fuckall and will have to change everything to integrate API :')
+export default function Form(props: {id : number}){ //here id is the form_pk
 
-    //functions
-    const saveLocalForms : (localForms: formData[]) => void = (localForms) => {
-        localStorage.setItem("savedForms", JSON.stringify(localForms));
-    }
-
-    const getLocalForms: () => formData[] = () => {
-        const savedFormsJSON = localStorage.getItem("savedForms");
-        const persistentFormData = savedFormsJSON ? 
-        JSON.parse(savedFormsJSON) : [];
-
-        return persistentFormData;
-    }
-
-    const getCurrentForm : () => formData = () => {
-        const localForms = getLocalForms()
-
-        return (localForms.filter((form) => form.id === props.id)[0])
-    }
-
-    const saveFormData = (formState: formData) => {
-        const localForms = getLocalForms();
-        if(localForms.length === 0){
-            saveLocalForms([formState]);
-            return;
+    const getCurrentFormFields = async () => {
+        try{
+            const data = await getFormFields(props.id);
+            return data.results;
+        } catch(error) {
+            console.error(error);
         }
-        const updatedLocalForms = localForms.map((form) => form.id === formState.id ? 
-        formState : form
-        );
-        saveLocalForms(updatedLocalForms);
-    }
+    };
 
     //action reducer pattern
-    const formReducer: (state: formData, action: FormActions) => formData = (state, action) => {
+    const formReducer: (state: FormField[], action: FormActions) => FormField[] = (state, action) => {
         switch(action.type){
             //Add a field to formstate
             case "add_field": 
-                let newFormField : formField;
-                switch(formKind){
-                    case "text":
-                        newFormField = {
-                            kind : formKind,
-                            id: Number(new Date()),
-                            label: newFieldState,
-                            fieldType: fieldType,
-                            value: "",
-                        }
-                        break;
-                    case "textarea":
-                        newFormField = {
-                            kind : formKind,
-                            id: Number(new Date()),
-                            label: newFieldState,
-                            fieldType: "textarea",
-                            value: "",
-                        }
-                        break;
-                    case "dropdown":
-                        case "radio":
-                            case "multi":
-                                newFormField = {
-                                kind : formKind,
-                                id: Number(new Date()),
-                                label: newFieldState,
-                                options : fieldOptions,
-                                value: "",
-                            }
-                                break;
+                let newFormField : FormField = {
+                    id: Number(new Date()),
+                    label: newFieldState,
+                    kind : formKind,
+                    value: "",
                 }
-                let newState: formData = {...state,
-                                        formfields: [...state.formfields, 
-                                            newFormField as formField]}
+                switch(formKind){
+                    case "DROPDOWN":
+                        case "RADIO":
+                            newFormField = {
+                            kind : formKind,
+                            id: Number(new Date()),
+                            label: newFieldState,
+                            options : fieldOptions,
+                            value: "",
+                        }
+                        break;
+                }
+                let newState: FormField[] = [...state,
+                                            newFormField];
                 setNewField("");
                 setFieldOptions([]);
+                try{
+                createFormField(props.id, newFormField);} catch(error){console.log(error);} //sends POST request
                 return(newState);
 
                 //Update an existing field in formstate
                 case "update_field":
-                    return({
-                        ...state,
-                        formfields: state.formfields.map((field) => field.id === action.id ? {...field, label: action.value} : field)
-                    });
-                
+                    let field: FormField = state.filter((field) => field.id === action.id)[0];
+                    field.label = action.value;
+                    updateField(props.id, action.id, field);
+                    return state.map((f) => field.id === action.id ? field : f);
+        
                 //Updating options of a field in formstate
                 case "update_options":
                     let x = action.options.split(",");
-                    return({
-                        ...state,
-                        formfields:
-                        state.formfields.map((field) => field.id === action.id ? {...field, options: x} : field)
-                    });
+                    let newField = state.filter((field) => field.id === action.id)[0];
+                    newField.options = x;
+                    updateField(props.id, action.id, newField);
+                    return state.map((field) => field.id === action.id ? {...field, options: x} : field);
                 //Removing a field
                 case "remove_field":
-                    return({...state,
-                    formfields: state.formfields.filter((field) => field.id !== action.id)});
-                
-                //Changing the title of form
-                case "change_title":
-                    return({...state, title: action.value});
+                    removeField(props.id, action.id);
+                    return state.filter((field) => field.id !== action.id);
+                case "set_fields":
+                    return action.value;
+                default:
+                    return state;
         }
     }
 
     //state variables
     const [newFieldState, setNewField] = useState("");
-    const [formKind, setFormKind] = useState("dropdown" as formKinds);
-    const [fieldType, setFieldType] = useState("text" as textFieldTypes);
+    const [formKind, setFormKind] = useState("dropdown" as fieldKind);
     const [fieldOptions, setFieldOptions] = useState([] as string[])
-    const titleRef = useRef<HTMLInputElement>(null);
-    const [formState, formDispatch] = useReducer(formReducer, getCurrentForm())
+    const [formState, formDispatch] = useReducer(formReducer, []);
+    const [update, setUpdate] = useState<any>({});
 
     //background operations
     useEffect(() => {
-        titleRef.current?.focus();
         document.title = "Form Editor";
+        getCurrentFormFields().then(fields => formDispatch({type:'set_fields', value: fields}));
         return () => {document.title = "Forms";};
     }, [])
 
-    useEffect(() => {
-        let timeout = setTimeout(() => {saveFormData(formState)}, 1000);
-        return () => {
-            clearTimeout(timeout);
-        }
-    });
 
     return(
         <div>
-            <div>
-                <input //this is immutable without the titleRef
-                className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
-                type="text"
-                value={formState.title}
-                ref={titleRef}
-                onChange={(e) => {
-                    formDispatch({type: "change_title", value: e.target.value});
-                }}
-                />
-            </div>
-        {formState.formfields.map((field) => (
+        {formState.map((field) => (
             <div className="flex" key={field.id}>
-                {field.kind === 'text' || field.kind === 'textarea' ? 
+                {field.kind === 'TEXT' ? 
                 <div className="flex-1">
                 <input
                 className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
-                type={(field as TextField).fieldType}
+                type='text'
                 value={field.label}
                 onChange={(e) => {
                     formDispatch({type: "update_field", value: e.target.value, id: field.id});
@@ -196,7 +144,7 @@ export default function Form(props: {id : number}){
                     setNewField(e.target.value);
                 }}
                 />
-                {formKind !== 'text' && formKind !== 'textarea' ? 
+                {formKind !== 'TEXT' ? 
                 <input
                 className="border-2 border-gray-200 rounded-lg p-2 m-2 w-full"
                 type="text"
@@ -205,30 +153,16 @@ export default function Form(props: {id : number}){
                 onChange={(e) => {
                     setFieldOptions(e.target.value.split(','));
                 }}
-                /> : []}
+                /> : null}
             </div>
             <div>
             <select 
-            onChange={(e) => setFormKind(e.target.value as formKinds)}
+            onChange={(e) => setFormKind(e.target.value as fieldKind)}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 mt-3 rounded">
-                <option value="dropdown">Dropdown</option>
-                <option value="radio">Radio</option>
-                <option value="multi">Multi-select</option>
-                <option value="text">Text</option>
-                <option value="textarea">Textarea</option>
+                <option value="DROPDOWN">Dropdown</option>
+                <option value="RADIO">Radio</option>
+                <option value="TEXT">Text</option>
             </select>
-            {formKind === 'text' ? 
-            <select 
-            onChange={(e) => setFieldType(e.target.value as textFieldTypes)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 ml-6 mt-3 rounded">
-                <option value="text">Text</option>
-                <option value="tel">Phone Number</option>
-                <option value="email">Email</option>
-                <option value="date">Date</option>
-            </select>
-            :
-            []}
-            
             </div>
             <div key="100">
                 <button 
@@ -239,7 +173,7 @@ export default function Form(props: {id : number}){
             </div>
           <button 
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded"
-          onClick={() => saveFormData(formState)}
+          onClick={() => console.log(getCurrentFormFields().then(_=>{return _;}))}
           >Save</button>
           <Link
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2 rounded" 

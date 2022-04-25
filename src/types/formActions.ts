@@ -1,4 +1,4 @@
-import { Form } from './formTypes';
+import { Form, FormField } from './formTypes';
 
 type AddField = {
     type: "add_field";
@@ -26,20 +26,9 @@ type ChangeTitle = {
     value: string;
 }
 
-export type FormActions = AddField | UpdateField | UpdateOptions | RemoveField | ChangeTitle;
-
-type RemoveForm = {
-    type: "remove_form";
-    id: number
+type SetFields = {
+    type: "set_fields";
+    value: FormField[]
 }
 
-type AddForm = {
-    type: "add_form";
-}
-
-type setForms = {
-    type: "set_forms";
-    forms: Form[];
-}
-
-export type LocalFormActions = RemoveForm | AddForm | setForms;
+export type FormActions = AddField | UpdateField | UpdateOptions | RemoveField | SetFields;
