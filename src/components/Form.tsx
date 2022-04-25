@@ -1,5 +1,5 @@
 import { Link } from 'raviger';
-import React, { useEffect, useState, useRef, useReducer } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import { FormField, fieldKind } from '../types/formTypes';
 import { FormActions } from '../types/formActions';
 import { getFormFields, createFormField, updateField, removeField } from '../utils/apiUtils';
@@ -77,14 +77,13 @@ export default function Form(props: {id : number}){ //here id is the form_pk
     const [formKind, setFormKind] = useState("dropdown" as fieldKind);
     const [fieldOptions, setFieldOptions] = useState([] as string[])
     const [formState, formDispatch] = useReducer(formReducer, []);
-    const [update, setUpdate] = useState<any>({});
 
     //background operations
     useEffect(() => {
         document.title = "Form Editor";
         getCurrentFormFields().then(fields => formDispatch({type:'set_fields', value: fields}));
         return () => {document.title = "Forms";};
-    }, [])
+    });
 
 
     return(
